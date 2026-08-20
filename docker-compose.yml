@@ -1,0 +1,18 @@
+version: '3'
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    volumes:
+      - db_data:/app/tasks.db
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    volumes:
+      - db_data:/worker/tasks.db
+volumes:
+  db_data:
