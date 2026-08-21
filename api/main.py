@@ -1,1 +1,20 @@
-from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport sqlite3\nimport threading\nimport time\n\napp = FastAPI()\n\nclass Task(BaseModel):\n    message: str\n\nconn = sqlite3.connect('tasks.db')\ncursor = conn.cursor()\ncursor.execute('CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, message TEXT)')\nconn.commit()\n\n@app.post('/tasks')\ndef create_task(task: Task):\n    cursor.execute('INSERT INTO tasks (message) VALUES (?)', (task.message,))\n    conn.commit()\n    return {'id': cursor.lastrowid}\n\ndef process_tasks():\n    while True:\n        cursor.execute('SELECT * FROM tasks')\n        tasks = cursor.fetchall()\n        for task in tasks:\n            print(f'Processing task {task[0]}: {task[1]}')\n            time.sleep(2)\n        time.sleep(5)\n\nthreading.Thread(target=process_tasks, daemon=True).start()
+from fastapi import FastAPI
+from pydantic import BaseModel
+import psycopg2
+import os
+
+app = FastAPI()
+
+class Task(BaseModel):
+    message: str
+
+conn = psycopg2.connect(os.environ['DATABASE_URL'])
+cursor = conn.cursor()
+cursor.execute('CREATE TABLE IF NOT EXISTS tasks (id SERIAL PRIMARY KEY, message TEXT)')
+conn.commit()
+
+@app.post('/tasks')
+def create_task(task: Task):
+    cursor.execute('INSERT INTO tasks (message) VALUES (%s) RETURNING id', (task.message,))
+    conn.commit()
+    return {'id': cursor.fetchone()[0]}
