@@ -23,3 +23,7 @@ def create_task(task: Task):
     task_id = cursor.fetchone()[0]
     r.rpush('task_queue', f'{task_id}:{task.message}')
     return {'id': task_id}
+
+@app.get('/health')
+def health_check():
+    return {'status': 'healthy'}

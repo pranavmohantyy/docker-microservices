@@ -3,6 +3,7 @@ import time
 import redis
 import psycopg2
 
+
 def process_tasks():
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cursor = conn.cursor()
@@ -14,6 +15,7 @@ def process_tasks():
             print(f'Processing task {task_id}: {task_message}')
             time.sleep(2)
         time.sleep(5)
+
 
 if __name__ == '__main__':
     process_tasks()
